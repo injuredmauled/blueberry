@@ -9,7 +9,9 @@ use Illuminate\Support\Facades\Http;
 class MakeRequest implements Action
 {
     private const TO_ENCODING = 'UTF-8';
+
     private const HASH_ALGORITHM = 'sha256';
+
     private const BASE_URL = 'https://api.switch-bot.com';
 
     private array $headers = [];
@@ -18,7 +20,7 @@ class MakeRequest implements Action
     {
         $nonce = self::guidv4();
         $t = time() * 1000;
-        $data = mb_convert_encoding($this->token . $t . $nonce, self::TO_ENCODING);
+        $data = mb_convert_encoding($this->token.$t.$nonce, self::TO_ENCODING);
         $sign = hash_hmac(self::HASH_ALGORITHM, $data, $secret, true);
         $sign = strtoupper(base64_encode($sign));
 
@@ -27,9 +29,9 @@ class MakeRequest implements Action
         $this->headers['t'] = $t;
     }
 
-    public static function for(string $token, string $secret): self
+    public static function for(string $token, string $secret): static
     {
-        return new self($token, $secret);
+        return new static($token, $secret);
     }
 
     public function do(): PendingRequest
@@ -45,8 +47,8 @@ class MakeRequest implements Action
         // Generate 16 bytes (128 bits) of random data or use the data passed into the function.
         $data = $data ?? random_bytes(16);
         assert(strlen(($data)) == 16);
-        $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
-        $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
+        $data[6] = chr(ord($data[6]) & 0x0F | 0x40);
+        $data[8] = chr(ord($data[8]) & 0x3F | 0x80);
 
         // Output the 36 character UUID.
         return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
